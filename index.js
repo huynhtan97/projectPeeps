@@ -3,13 +3,15 @@ const http = require('http');
 const url = require('url');
 const WebSocket = require('ws');
 
-const app = express();
+const path = require('path');
 
-app.use(function (req, res) {
-  res.send({ msg: "hello" });
-});
+const PORT = process.env.PORT || 3000;
+const INDEX = path.join(__dirname, 'index.html');
 
-const server = http.createServer(app);
+const server = express()
+  .use((req, res) => res.send({ msg: "hello" }) )
+  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
+
 const wss = new WebSocket.Server({ server });
 
 wss.broadcast = function broadcast(message) {
@@ -21,22 +23,25 @@ wss.broadcast = function broadcast(message) {
 };
 
 wss.on('connection', function connection(ws, req) {
+  let isFirstMessage = true;
+  let userName = "";
   const location = url.parse(req.url, true);
   // You might use location.query.access_token to authenticate or share sessions
   // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
   ws.on('message', function incoming(message) {
-    console.log('received: %s', message);
-    // Broadcast to all.
-    wss.broadcast(message)
+    console.log('received: %s', message);    
+    if (isFirstMessage) {
+        isFirstMessage = false;
+        userName = message
+    } else {
+        // Broadcast to all.
+        wss.broadcast(userName+ ": " +message)        
+    }
   });
 
   ws.send('Welcome to chat');
 });
 
 
-
-server.listen(8080, function listening() {
-  console.log('Listening on %d', server.address().port);
-});
 

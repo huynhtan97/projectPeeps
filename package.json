@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bufferutil": "3.0.3",
     "express": "^4.16.2",
-    "ws": "^3.3.2"
+    "utf-8-validate": "3.0.4",
+    "ws": "3.3.2"
   }
 }
